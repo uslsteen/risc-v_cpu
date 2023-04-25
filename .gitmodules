@@ -1,0 +1,9 @@
+[submodule "ELFIO"]
+	path = ELFIO
+	url = git@github.com:serge1/ELFIO.git
+[submodule "CLI11"]
+	path = CLI11
+	url = git@github.com:CLIUtils/CLI11.git
+[submodule "sim2022"]
+	path = sim2022
+	url = git@github.com:xoRnyTeam/sim2022.git
