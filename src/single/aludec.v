@@ -1,7 +1,8 @@
 module aludec (input [5:0] funct,
-input [1:0] aluop,
-output reg [3:0] alucontrol
-);
+               input [1:0] aluop,
+               output reg [3:0] alucontrol
+               );
+//
 always @ (*)
 case (aluop)
     2'b00: alucontrol <= 4'b0000; // add
