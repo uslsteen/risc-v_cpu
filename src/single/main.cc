@@ -11,8 +11,10 @@
 #include <stdlib.h>
 #include <string>
 
-void parse_args(std::string &elf_path, std::string &vcd_path, int argc,
-                char **argv) {
+constexpr int end = 300;
+
+int parse_args(std::string &elf_path, std::string &vcd_path, int &end_time,
+                int argc, char **argv) {
   //
   CLI::App app{"Verilator tool RISCV simulator"};
   app.add_option("--elf-path", elf_path, "Path to elf file")
@@ -26,13 +28,14 @@ void parse_args(std::string &elf_path, std::string &vcd_path, int argc,
       ->default_val(1000);
   //
   CLI11_PARSE(app, argc, argv);
-  return 0;
 }
 
 int main(int argc, char **argv) {
 
   std::string elf_path{}, vcd_path{};
-  parse_args(elf_path, vcd_path, argc, argv);
+  int end_time = 0;
+  //
+  parse_args(elf_path, vcd_path, end_time, argc, argv);
 
   // Init verialtor
   Verilated::commandArgs(argc, argv);
@@ -41,7 +44,22 @@ int main(int argc, char **argv) {
   Verilated::traceEverOn(true);
 
   Tracer my_tracer(top_module.get(), vcd_path);
-  ELFLoader my_loader(elf_path);
+  ELFLoader my_loader{elf_path};
   //
-  my_loader.load(top_module);
+  my_loader.load(top_module.get());
+
+  int clock = 0;
+  for (vluint64_t vtime = 0; !Verilated::gotFinish() && vtime <= end; ++vtime) {
+    //
+    if (vtime % 8 == 0)
+      clock ^= 1;
+    //
+    top_module->clk = clock;
+    top_module->eval();
+    my_tracer.dump(vtime);
+  }
+
+  top_module->final();
+
+  return 0;
 }

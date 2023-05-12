@@ -16,9 +16,9 @@ module controller (input [6:0] opc,
     logic inv_branch;
     maindec md (opc, funct3, 
                 memtoreg, memwrite, memsize,
-                branch, alusrc, alusrc_a_zero, regwrite, jump, jumpsrc, hlt);
+                branch, alusrc, alusrc_a_zero, regwrite, jump, jump_src, hlt);
     //
-    aludec ad (opc, funct3, funct7, alucontrol, inv_branch);
+    aludec ad (opc, funct7, funct3, alucontrol, inv_branch);
     //
     assign pcsrc = branch & (is_zero ^ inv_branch);
     //

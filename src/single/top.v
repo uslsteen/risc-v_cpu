@@ -3,7 +3,7 @@ module top (input clk, reset,
             output memwrite
            );
     //! NOTE: veerialtor public
-    logic [31:0] pc, 
+    logic [31:0] pc /* verilator public */;
     logic [31:0] instr, readdata;
     logic [2:0] memsize;
     //

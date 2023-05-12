@@ -1,25 +1,84 @@
-module maindec(input [5:0] op,
+`include "opcodes.v"
+`include "consts.v"
+
+module maindec(input [6:0] op,
+               input [2:0] funct3,
                output memtoreg, memwrite,
-               output branch, alusrc,
-               output regdst, regwrite,
+               output [2:0] memsize,
+               output branch, output [1:0] alusrc,
+               output alusrc_a_zero,
+               output regwrite,
                output jump,
-               output [1:0] aluop
+               output jumpsrc,
+               output hlt
               );
-//
-reg [8:0] controls;
-assign {regwrite, regdst, alusrc,
-    branch, memwrite,
-    memtoreg, jump, aluop} = controls;
-always @ (*)
-//
-case(op)
-    6'b000000: controls <= 9'b110000010; //Rtyp
-    6'b100011: controls <= 9'b101001000; //LW
-    6'b101011: controls <= 9'b001010000; //SW
-    6'b000100: controls <= 9'b000100001; //BEQ
-    6'b001000: controls <= 9'b101000000; //ADDI
-    6'b000010: controls <= 9'b000000100; //J
-default: controls <= 9'bxxxxxxxxx; //???
-endcase
-//
-endmodule
+    //
+    logic [1:0] al_src;
+    logic memtoreg_v = 0,
+          memwrite_v = 0,
+          branch_v = 0,
+          regwrite_v = 0,
+          jump_v = 0,
+          jumpsrc_v = 0,
+          alusrc_a_zero_v = 0,
+          hlt_v = 0;
+    logic [2:0] memsize_v = 3'bxxx;
+
+    //
+    assign alusrc = al_src;
+    assign memtoreg = memtoreg_v;
+    assign memwrite = memwrite_v;
+    assign memsize = memsize_v;
+    assign branch = branch_v;
+    assign regwrite = regwrite_v;
+    assign jump = jump_v;
+    assign jumpsrc = jumpsrc_v;
+    assign alusrc_a_zero = alusrc_a_zero_v;
+    assign hlt = hlt_v;
+
+    //
+    always_latch
+        case(op)
+            `OPC_BRANCH: begin
+                al_src = `ALU_SRC_REG;
+                branch_v = 1;
+            end
+            `OPC_JAL, `OPC_JALR: begin
+                jumpsrc_v = (op == `OPC_JALR);
+                al_src = `ALU_SRC_NPC;
+                alusrc_a_zero_v = 1;
+                jump_v = 1;
+                regwrite_v = 1;
+            end
+            `OPC_LOAD: begin
+                al_src = `ALU_SRC_IMM;
+                regwrite_v = 1;
+                memtoreg_v = 1;
+                memsize_v = funct3;
+            end
+            `OPC_STORE: begin
+                al_src = `ALU_SRC_IMM;
+                memwrite_v = 1;
+                memsize_v = funct3;
+            end
+            `OPC_LUI, `OPC_I_TYPE: begin
+                alusrc_a_zero_v = (op == `OPC_LUI);
+                al_src = `ALU_SRC_IMM;
+                regwrite_v = 1;
+            end
+            `OPC_AUIPC: begin
+                al_src = `ALU_SRC_PC;
+                alusrc_a_zero_v = 1;
+                regwrite_v = 1;
+            end
+            `OPC_SYSTEM: begin
+                hlt_v = 1;
+            end
+            `OPC_R_TYPE: begin
+                al_src = `ALU_SRC_REG;
+                regwrite_v = 1;
+            end
+            default:
+                ;
+        endcase
+    endmodule

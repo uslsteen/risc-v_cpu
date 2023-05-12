@@ -1,6 +1,6 @@
 `include "opcodes.v"
 
-module immSel (
+module imm_sel (
                 input [31:0] instr,
                 output [31:0] imm
               );

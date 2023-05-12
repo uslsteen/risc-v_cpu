@@ -12,7 +12,7 @@ module aludec (input [6:0] opc,
             `OPC_BRANCH:
             case (funct3)
                 3'b000, 3'b001: begin
-                    inv_branch = funct3 = 3'b001;
+                    inv_branch = funct3 == 3'b001;
                     //! NOTE: beq, bne
                     alucontrol = `ALUOP_SUB;
                 end
@@ -32,7 +32,7 @@ module aludec (input [6:0] opc,
                 logic is_funct7_zero = (funct7 == 0);
                 case (funct3)
                     3'b000:
-                        alucontrol = (opcode == `OPC_I_TYPE) || is_funct7_zero ? `ALUOP_ADD : `ALUOP_SUB;
+                        alucontrol = (opc == `OPC_I_TYPE) || is_funct7_zero ? `ALUOP_ADD : `ALUOP_SUB;
                     3'b001:
                         alucontrol = `ALUOP_SLL;
                     3'b010:

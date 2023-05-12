@@ -3,7 +3,7 @@
 module datapath (input clk, reset, hlt,
                  input memtoreg, pcsrc, jump_src,
                  input [1:0] alusrc,
-                 input regwrite, jump,
+                 input writereg, jump,
                  input [3:0] alucontrol,
                  input alusrc_a_zero,
                  output zero,
@@ -13,7 +13,7 @@ module datapath (input clk, reset, hlt,
                  input [31:0] readdata
                 );
     //
-    wire [31:0] pcnext, pcnextbr, pcplus4, pcbranch jmp_base, jmp_pc, jmp_fin_pc;
+    wire [31:0] pcnext, pcnextbr, pcplus4, pcbranch, jump_base, jump_pc, jmp_pc_final;
     wire [4:0] ra1;
     wire [31:0] srca, srcb;
     wire [31:0] imm;
@@ -31,7 +31,7 @@ module datapath (input clk, reset, hlt,
     //
     mux2 #(32) pcbrmux(pcplus4, pcbranch, pcsrc, pcnextbr);
     mux2 #(32) jmpscrmux(pc, srca, jump_src, jump_base);
-    adder jmptar(jump_base, imm, jmp_pc);
+    adder jmptar(jump_base, imm, jump_pc);
     assign jmp_pc_final = jump_pc & ~1;
     mux2 #(32) pcmux(pcnextbr, jmp_pc_final, jump, pcnext);
     //
@@ -49,7 +49,7 @@ module datapath (input clk, reset, hlt,
     // signext se(instr[15:0], signimm);
 
     //! NOTE: ALU logic
-    mux2 #(32) srcbmux(writedata, imm, pcbranch, pcplus4, alusrc, srcb);
+    mux4 #(32) srcbmux(writedata, imm, pcbranch, pcplus4, alusrc, srcb);
     alu alu(srca, srcb, alucontrol, aluout, zero);
 //
 endmodule

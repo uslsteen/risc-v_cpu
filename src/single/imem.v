@@ -3,8 +3,7 @@ module imem #(parameter IMEM_POWER = 18)
              output [31:0] rd
             );
     
-    //! NOTE: verilator public
-    reg [31:0] RAM[((1 << IMEM_POWER) - 1):0];
+    reg [31:0] RAM[((1 << IMEM_POWER) - 1):0] /* verilator public */;
     //! NOTE: word aligned
     assign rd = RAM[a] ;
     //

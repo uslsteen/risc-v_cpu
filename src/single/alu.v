@@ -7,8 +7,8 @@ module alu(input [31:0] a, b,
 
   logic [4:0] shamt = b[4:0];
   // always @(*) begin
-  always latch begin 
-               case (ALU_op)
+  always_latch begin 
+                case (ALU_op)
                          `ALUOP_ADD:
                              ALU_out = a + b;
                          `ALUOP_SUB:
@@ -29,9 +29,8 @@ module alu(input [31:0] a, b,
                              ALU_out = a >> shamt;
                          `ALUOP_SRA:
                              ALU_out = $signed(a) >>> shamt;
-                         default:
-                  //! NOTE: by default do nothing
-                  default: ;
+                        //! NOTE: by default do nothing
+                         default: ;
                 endcase 
                 zero = (ALU_out == 0);
               end

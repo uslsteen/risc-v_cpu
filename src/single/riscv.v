@@ -13,7 +13,7 @@ module riscv (input clk, reset,
     wire [1:0] alusrc;
     wire [3:0] alucontrol;
     //
-    controller c(instr[6:0], instr[14:12], instr[31:25], zero, 
+    controller c(instr[6:0], instr[31:25], instr[14:12], zero, 
                  memtoreg, memwrite, memsize, pcsrc,
                  alusrc, regwrite, jump,
                  alucontrol, jump_src, alusrc_a_zero, hlt);
