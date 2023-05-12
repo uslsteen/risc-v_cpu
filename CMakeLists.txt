@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(riscv-sim)
 
-add_subdirectory(src)
+add_subdirectory(src/single)
 
 set(CLI11_PRECOMPILED ON)
 add_subdirectory(CLI11)

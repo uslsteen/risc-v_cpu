@@ -1,19 +1,58 @@
-module aludec (input [5:0] funct,
-               input [1:0] aluop,
-               output reg [3:0] alucontrol
-               );
+`include "alu_consts.v"
+
+module aludec (input [6:0] opc,
+               input [6:0] funct7,
+               input [2:0] funct3,
+               output reg [3:0] alucontrol,
+               output inv_branch
+              );
 //
-always @ (*)
-case (aluop)
-    2'b00: alucontrol <= 4'b0000; // add
-    2'b01: alucontrol <= 4'b0001; // sub
-    default: case(funct) // RTYPE
-        6'b100000: alucontrol <= 4'b0000; // ADD
-        6'b100010: alucontrol <= 4'b0001; // SUB
-        6'b100100: alucontrol <= 4'b0100; // AND
-        6'b100101: alucontrol <= 4'b0101; // OR
-        6'b101010: alucontrol <= 4'b1100; // SLT
-        default: alucontrol <= 4'bxxxx; // ???
-    endcase
-endcase
+    always_latch
+        case (opc)
+            `OPC_BRANCH:
+            case (funct3)
+                3'b000, 3'b001: begin
+                    inv_branch = funct3 = 3'b001;
+                    //! NOTE: beq, bne
+                    alucontrol = `ALUOP_SUB;
+                end
+                3'b100, 3'b101:
+                    //! NOTE: blt, bge
+                    alucontrol = `ALUOP_SLT;
+                3'b110, 3'b111:
+                    alucontrol = `ALUOP_SLTU;
+                default
+                    alucontrol = 4'bxxxx;
+            endcase
+            //
+            `OPC_LUI, `OPC_AUIPC, `OPC_JAL, `OPC_JALR, `OPC_LOAD, `OPC_STORE, `OPC_SYSTEM:
+                alucontrol = `ALUOP_ADD;
+            //
+            `OPC_R_TYPE, `OPC_I_TYPE: begin
+                logic is_funct7_zero = (funct7 == 0);
+                case (funct3)
+                    3'b000:
+                        alucontrol = (opcode == `OPC_I_TYPE) || is_funct7_zero ? `ALUOP_ADD : `ALUOP_SUB;
+                    3'b001:
+                        alucontrol = `ALUOP_SLL;
+                    3'b010:
+                        alucontrol = `ALUOP_SLT;
+                    3'b011:
+                        alucontrol = `ALUOP_SLTU;
+                    3'b100:
+                        alucontrol = `ALUOP_XOR;
+                    3'b101:
+                        alucontrol = is_funct7_zero ? `ALUOP_SRL : `ALUOP_SRA;
+                    3'b110:
+                        alucontrol = `ALUOP_OR;
+                    3'b111:
+                        alucontrol = `ALUOP_AND;
+                    default:
+                        alucontrol = 4'bxxxx;
+                endcase
+            end
+            //
+            default:
+                alucontrol = 4'bxxxx;
+        endcase
 endmodule
