@@ -1,7 +1,7 @@
 `include "consts.v"
 
 //
-module datapath (input clk, reset, hlt,
+module datapath (input clk, reset, hltD,
                  //
                  input mem_to_regD, mem_writeD, jump_srcD,
                  input [2:0] mem_sizeD,
@@ -10,7 +10,7 @@ module datapath (input clk, reset, hlt,
                  //
                  input reg_writeD, jumpD,
                  input [3:0] alu_controlD,
-                 input alu_src_is_zero,
+                 input alu_src_is_zeroD,
                  output [31:0] pcF,
                  input [31:0] instrF,
                  output [31:0] alu_outM, write_dataM,
@@ -77,7 +77,7 @@ module datapath (input clk, reset, hlt,
     logic [4:0] ra1E, ra2E, rdE;
     logic [31:0] pcE, rd1E, rd2E, immE, instrE, resultW;
 
-    immSel immsel(.instr(instrD), .imm(immD));
+    imm_sel imm_sel(.instr(instrD), .imm(immD));
     //
     regfile rf(.clk(clk), 
                .ra1(ra1D),
@@ -100,7 +100,7 @@ module datapath (input clk, reset, hlt,
                                      mem_writeD, 
                                      mem_sizeD, 
                                      branchD, 
-                                     inv_brD, 
+                                     inv_branchD, 
                                      rd1D, 
                                      rd2D, 
                                      ra1D, 
@@ -170,7 +170,7 @@ module datapath (input clk, reset, hlt,
             .b(srcBE),
             .alu_op(alu_controlE), 
             .alu_out(alu_outE),
-            .iszero(zeroE));
+            .zero(zeroE));
 
     logic [31:0] jmp_baseE, jmp_pcE;
     adder pcaddimm(.a(pcE), .b(immE), .y(pcbranchE));
@@ -253,6 +253,18 @@ module datapath (input clk, reset, hlt,
     //! NOTE: writeback stage
     mux2 #(32) resmux(.d0(alu_outW), .d1(read_dataW),
                       .s(mem_to_regW), .y(resultW));
-    reg [31:0] num = 0;
+
+    //! -------------------------------------------------------------
+    
+    wire unused_warning_fix = &{1'b0,
+                                alu_srcAE,
+                                mem_writeW,
+                                validW,
+                                controlChangeW,
+                                hltW,
+                                write_dataW,
+                                pcW,
+                                instrW,
+                                1'b0};
 //
 endmodule

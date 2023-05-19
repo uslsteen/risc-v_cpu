@@ -25,11 +25,11 @@ module riscv (input clk, reset,
                  .alu_srcAD(alu_srcAD),
                  .alu_srcBD(alu_srcBD), 
                  .reg_writeD(reg_writeD), 
-                 .jump(jumpD),
+                 .jumpD(jumpD),
                  .alu_controlD(alu_controlD), 
                  .jump_srcD(jump_srcD), 
                  .alu_src_is_zeroD(alu_src_is_zeroD), 
-                 .hlt(hltD),
+                 .hltD(hltD),
                  .branchD(branchD),
                  .inv_branchD(inv_branchD)
                  );
@@ -60,5 +60,9 @@ module riscv (input clk, reset,
                 );
     //
     //! NOTE fixed unused 
+    wire unused_warning_fix = &{1'b0,
+                                instrD[24:15],
+                                instrD[11:7],
+                                1'b0};
     //
 endmodule

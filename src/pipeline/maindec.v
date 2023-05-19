@@ -24,7 +24,7 @@ module maindec(input logic[6:0] opc,
                 alu_src_is_zero = 0;
                 reg_write = 1;
                 mem_size = 3'bxxx;
-                memtoreg = 0;
+                mem_to_reg = 0;
                 mem_write = 0;
                 branch = 0;
                 jump = 0;
@@ -37,7 +37,7 @@ module maindec(input logic[6:0] opc,
                 alu_srcB = `ALU_SRCB_IMM;
                 reg_write = 1;
                 mem_size = 3'bxxx;
-                memtoreg = 0;
+                mem_to_reg = 0;
                 mem_write = 0;
                 branch = 0;
                 jump = 0;
@@ -49,7 +49,7 @@ module maindec(input logic[6:0] opc,
                 alu_srcB = `ALU_SRCB_REG;
                 reg_write = (opc == `OPC_R_TYPE);
                 mem_size = 3'bxxx;
-                memtoreg = 0;
+                mem_to_reg = 0;
                 mem_write = 0;
                 branch = (opc == `OPC_BRANCH);
                 jump = 0;
@@ -65,7 +65,7 @@ module maindec(input logic[6:0] opc,
                 jump = 1;
                 reg_write = 1;
                 mem_size = 3'bxxx;
-                memtoreg = 0;
+                mem_to_reg = 0;
                 mem_write = 0;
                 branch = 0;
                 hlt = 0;
@@ -74,7 +74,7 @@ module maindec(input logic[6:0] opc,
                 alu_srcA = `ALU_SRCA_REG;
                 alu_srcB = `ALU_SRCB_IMM;
                 reg_write = (opc == `OPC_LOAD);
-                memtoreg = (opc == `OPC_LOAD);
+                mem_to_reg = (opc == `OPC_LOAD);
                 mem_size = funct3;
                 mem_write = (opc == `OPC_STORE);
                 branch = 0;
@@ -89,7 +89,7 @@ module maindec(input logic[6:0] opc,
                 alu_srcB = 2'bxx;
                 mem_write = 0;
                 mem_size = 3'bxxx;
-                memtoreg = 0;
+                mem_to_reg = 0;
                 branch = 0;
                 reg_write = 0;
                 jump = 0;
@@ -102,7 +102,7 @@ module maindec(input logic[6:0] opc,
                 alu_srcB = 2'bxx;
                 mem_write = 0;
                 mem_size = 3'bxxx;
-                memtoreg = 0;
+                mem_to_reg = 0;
                 branch = 0;
                 reg_write = 0;
                 jump = 0;

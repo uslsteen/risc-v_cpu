@@ -13,7 +13,7 @@ module top (input clk, reset);
                  .mem_writeM(mem_writeM), 
                  .mem_sizeM(mem_sizeM), 
                  .alu_outM(alu_outM), 
-                 .write_data(write_dataM), 
+                 .write_dataM(write_dataM), 
                  .read_dataM(read_dataM)
                 );
     
