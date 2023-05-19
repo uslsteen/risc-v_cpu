@@ -138,7 +138,6 @@ module datapath (input clk, reset, hltD,
     logic controlChange;
     //
     assign pc_srcE = branchE & (zeroE ^ inv_brE);
-    //! NOTE: indirect branches processing
     assign controlChange = pc_srcE | jumpE;
 
     //
@@ -256,6 +255,25 @@ module datapath (input clk, reset, hltD,
 
     //! -------------------------------------------------------------
     
+    hazard hazard_resolver(.ra1D(ra1D), 
+                           .ra2D(ra2D), 
+                           .ra1E(ra1E), 
+                           .ra2E(ra2E),
+                           .rdE(rdE),
+                           .rdM(rdM),
+                           .rdW(rdW),
+                           .controlChange(controlChange),
+                           .mem_to_regE(mem_to_regE),
+                           .reg_writeM(reg_writeM),
+                           .reg_writeW(reg_writeW),
+                           .stallF(stallF),
+                           .stallD(stallD),
+                           .flushD(flushD),
+                           .flushE(flushE),
+                           .forwardAE(forwardAE),
+                           .forwardBE(forwardBE));
+
+
     wire unused_warning_fix = &{1'b0,
                                 alu_srcAE,
                                 mem_writeW,
