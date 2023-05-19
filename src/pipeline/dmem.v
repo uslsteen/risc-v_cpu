@@ -1,6 +1,6 @@
 module dmem #(parameter DMEM_POWER = 18)
              (input clk, we,
-              input [2:0] memsize,
+              input [2:0] mem_size,
               input [31:0] a, wd,
               output [31:0] rd
              );
@@ -13,6 +13,6 @@ module dmem #(parameter DMEM_POWER = 18)
 
     wire _unused_ok = &{1'b0,
                         a,
-                        memsize,
+                        mem_size,
                         1'b0};
 endmodule

@@ -1,84 +1,114 @@
 `include "opcodes.v"
 `include "consts.v"
 
-module maindec(input [6:0] opc,
-               input [2:0] funct3,
-               output memtoreg, memwrite,
-               output [2:0] memsize,
-               output branch, output [1:0] alusrc,
-               output alusrc_a_zero,
-               output regwrite,
-               output jump,
-               output jumpsrc,
-               output hlt
+module maindec(input logic[6:0] opc,
+               input logic[2:0] funct3,
+               output logic mem_to_reg, mem_write,
+               output logic[2:0] mem_size,
+               output logic branch,
+               output logic[1:0] alu_srcA,
+               output logic[1:0] alu_srcB,
+               output logic alu_src_is_zero,
+               output logic reg_write,
+               output logic jump,
+               output logic jump_src,
+               output logic hlt
               );
-    //
-    logic [1:0] al_src;
-    logic memtoreg_v = 0,
-          memwrite_v = 0,
-          branch_v = 0,
-          regwrite_v = 0,
-          jump_v = 0,
-          jumpsrc_v = 0,
-          alusrc_a_zero_v = 0,
-          hlt_v = 0;
-    logic [2:0] memsize_v = 3'bxxx;
 
-    //
-    assign alusrc = al_src;
-    assign memtoreg = memtoreg_v;
-    assign memwrite = memwrite_v;
-    assign memsize = memsize_v;
-    assign branch = branch_v;
-    assign regwrite = regwrite_v;
-    assign jump = jump_v;
-    assign jumpsrc = jumpsrc_v;
-    assign alusrc_a_zero = alusrc_a_zero_v;
-    assign hlt = hlt_v;
-
-    //
-    always_latch
+    always_comb
         case(opc)
-            `OPC_BRANCH: begin
-                al_src = `ALU_SRC_REG;
-                branch_v = 1;
-            end
-            `OPC_JAL, `OPC_JALR: begin
-                jumpsrc_v = (opc == `OPC_JALR);
-                al_src = `ALU_SRC_NPC;
-                alusrc_a_zero_v = 1;
-                jump_v = 1;
-                regwrite_v = 1;
-            end
-            `OPC_LOAD: begin
-                al_src = `ALU_SRC_IMM;
-                regwrite_v = 1;
-                memtoreg_v = 1;
-                memsize_v = funct3;
-            end
-            `OPC_STORE: begin
-                al_src = `ALU_SRC_IMM;
-                memwrite_v = 1;
-                memsize_v = funct3;
+            `OPC_AUIPC: begin
+                alu_srcA = `ALU_SRCA_PC;
+                alu_srcB = `ALU_SRCB_IMM;
+                //! FIXME : alu_src_is_zero = 1 ? 
+                alu_src_is_zero = 0;
+                reg_write = 1;
+                mem_size = 3'bxxx;
+                memtoreg = 0;
+                mem_write = 0;
+                branch = 0;
+                jump = 0;
+                jump_src = 0;
+                hlt = 0;
             end
             `OPC_LUI, `OPC_I_TYPE: begin
-                alusrc_a_zero_v = (opc == `OPC_LUI);
-                al_src = `ALU_SRC_IMM;
-                regwrite_v = 1;
+                alu_src_is_zero = (opc == `OPC_LUI);
+                alu_srcA = `ALU_SRCA_REG;
+                alu_srcB = `ALU_SRCB_IMM;
+                reg_write = 1;
+                mem_size = 3'bxxx;
+                memtoreg = 0;
+                mem_write = 0;
+                branch = 0;
+                jump = 0;
+                jump_src = 0;
+                hlt = 0;
             end
-            `OPC_AUIPC: begin
-                al_src = `ALU_SRC_PC;
-                alusrc_a_zero_v = 1;
-                regwrite_v = 1;
+            `OPC_R_TYPE, `OPC_BRANCH: begin
+                alu_srcA = `ALU_SRCA_REG;
+                alu_srcB = `ALU_SRCB_REG;
+                reg_write = (opc == `OPC_R_TYPE);
+                mem_size = 3'bxxx;
+                memtoreg = 0;
+                mem_write = 0;
+                branch = (opc == `OPC_BRANCH);
+                jump = 0;
+                jump_src = 0;
+                alu_src_is_zero = 0;
+                hlt = 0;
+            end
+            `OPC_JAL, `OPC_JALR: begin
+                jump_src = (opc == `OPC_JALR);
+                alu_srcA = `ALU_SRCA_PC;
+                alu_srcB = `ALU_SRCB_FOUR;
+                alu_src_is_zero = 0;
+                jump = 1;
+                reg_write = 1;
+                mem_size = 3'bxxx;
+                memtoreg = 0;
+                mem_write = 0;
+                branch = 0;
+                hlt = 0;
+            end
+            `OPC_LOAD, `OPC_STORE: begin
+                alu_srcA = `ALU_SRCA_REG;
+                alu_srcB = `ALU_SRCB_IMM;
+                reg_write = (opc == `OPC_LOAD);
+                memtoreg = (opc == `OPC_LOAD);
+                mem_size = funct3;
+                mem_write = (opc == `OPC_STORE);
+                branch = 0;
+                jump = 0;
+                jump_src = 0;
+                alu_src_is_zero = 0;
+                hlt = 0;
             end
             `OPC_SYSTEM: begin
-                hlt_v = 1;
+                hlt = 1;
+                alu_srcA = 2'bxx;
+                alu_srcB = 2'bxx;
+                mem_write = 0;
+                mem_size = 3'bxxx;
+                memtoreg = 0;
+                branch = 0;
+                reg_write = 0;
+                jump = 0;
+                jump_src = 0;
+                alu_src_is_zero = 0;
             end
-            `OPC_R_TYPE: begin
-                al_src = `ALU_SRC_REG;
-                regwrite_v = 1;
+            default: begin
+                hlt = 0;
+                alu_srcA = 2'bxx;
+                alu_srcB = 2'bxx;
+                mem_write = 0;
+                mem_size = 3'bxxx;
+                memtoreg = 0;
+                branch = 0;
+                reg_write = 0;
+                jump = 0;
+                jump_src = 0;
+                alu_src_is_zero = 0;
+                $display("ERROR: unknown opcode %d", opc);
             end
-            default:
-                ;
         endcase
     endmodule

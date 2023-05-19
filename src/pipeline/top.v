@@ -23,11 +23,11 @@ module top (input clk, reset);
 
     //
     dmem #(18) dmem (.clk(clk), 
-                     .mem_writeM(mem_writeM), 
-                     .mem_sizeM(mem_sizeM), 
-                     .alu_outM(alu_outM), 
-                     .write_dataM(write_dataM), 
-                     .read_dataM(read_dataM)
+                     .we(mem_writeM), 
+                     .mem_size(mem_sizeM), 
+                     .a(alu_outM), 
+                     .wd(write_dataM), 
+                     .rd(read_dataM)
                     );
     //
 endmodule

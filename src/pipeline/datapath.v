@@ -10,14 +10,12 @@ module datapath (input clk, reset, hlt,
                  //
                  input reg_writeD, jumpD,
                  input [3:0] alu_controlD,
-                 input alu_src_a_zero,
+                 input alu_src_is_zero,
                  output [31:0] pcF,
                  input [31:0] instrF,
                  output [31:0] alu_outM, write_dataM,
                  input [31:0] read_dataM,
-                 input mem_writeD,
                  output mem_writeM,
-                 input [2:0] mem_sizeD,
                  output [2:0] mem_sizeM,
                  input branchD, inv_branchD,
                  output [31:0] instrD
@@ -65,7 +63,7 @@ module datapath (input clk, reset, hlt,
     //! -------------------------------------------------------------
     //! NOTE: decode stage
     logic [31:0] immD, rd1D, rd2D;
-    logic [4:0] ra1D = instrD[19:15] & ~{5{alu_src_a_zeroD}}; 
+    logic [4:0] ra1D = instrD[19:15] & ~{5{alu_src_is_zeroD}}; 
     logic [4:0] ra2D = instrD[24:20];; 
     logic [4:0] rdD = instrD[11:7];
     logic [4:0] rdW;
