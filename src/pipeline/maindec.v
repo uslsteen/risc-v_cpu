@@ -1,7 +1,7 @@
 `include "opcodes.v"
 `include "consts.v"
 
-module maindec(input [6:0] op,
+module maindec(input [6:0] opc,
                input [2:0] funct3,
                output memtoreg, memwrite,
                output [2:0] memsize,
@@ -38,13 +38,13 @@ module maindec(input [6:0] op,
 
     //
     always_latch
-        case(op)
+        case(opc)
             `OPC_BRANCH: begin
                 al_src = `ALU_SRC_REG;
                 branch_v = 1;
             end
             `OPC_JAL, `OPC_JALR: begin
-                jumpsrc_v = (op == `OPC_JALR);
+                jumpsrc_v = (opc == `OPC_JALR);
                 al_src = `ALU_SRC_NPC;
                 alusrc_a_zero_v = 1;
                 jump_v = 1;
@@ -62,7 +62,7 @@ module maindec(input [6:0] op,
                 memsize_v = funct3;
             end
             `OPC_LUI, `OPC_I_TYPE: begin
-                alusrc_a_zero_v = (op == `OPC_LUI);
+                alusrc_a_zero_v = (opc == `OPC_LUI);
                 al_src = `ALU_SRC_IMM;
                 regwrite_v = 1;
             end

@@ -1,34 +1,33 @@
 module top (input clk, reset);
     //
     logic [31:0] pcF /* verilator public */;
-    logic [31:0] instrF, read_dataM, write_dataM, ALU_outM;
+    logic [31:0] instrF, read_dataM, write_dataM, alu_outM;
     logic [2:0] mem_sizeM;
-    logic mem_sizeM;
+    logic mem_writeM;
     //
     // NOTE: instantiate processor and memories
-    riscv riscv (clk, 
-                 reset, 
-                 pcF, 
-                 instrF, 
-                 mem_sizeM, 
-                 mem_sizeM, 
-                 ALU_outM, 
-                 write_dataM, 
-                 read_dataM
+    riscv riscv (.clk(clk), 
+                 .reset(reset), 
+                 .pcF(pcF), 
+                 .instrF(instrF), 
+                 .mem_writeM(mem_writeM), 
+                 .mem_sizeM(mem_sizeM), 
+                 .alu_outM(alu_outM), 
+                 .write_data(write_dataM), 
+                 .read_dataM(read_dataM)
                 );
     
     //
-    imem #(18) imem (pcF[19:2], 
-                     instrF
-                    );
+    imem #(18) imem (.a(pcF[19:2]), 
+                     .rd(instrF));
 
     //
-    dmem #(18) dmem (clk, 
-                     mem_sizeM, 
-                     mem_sizeM, 
-                     ALU_outM, 
-                     write_dataM, 
-                     read_dataM
+    dmem #(18) dmem (.clk(clk), 
+                     .mem_writeM(mem_writeM), 
+                     .mem_sizeM(mem_sizeM), 
+                     .alu_outM(alu_outM), 
+                     .write_dataM(write_dataM), 
+                     .read_dataM(read_dataM)
                     );
     //
 endmodule

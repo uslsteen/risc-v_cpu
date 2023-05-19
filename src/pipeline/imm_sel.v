@@ -24,7 +24,7 @@ module imm_sel (
             im = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
         //! NOTE S-imm
         `OPC_STORE:
-            im = {{21{instr[31]}}, instr[30:25], instr[11:7]}; // S imm
+            im = {{21{instr[31]}}, instr[30:25], instr[11:7]};
         default:
             im = 32'hxxxx;
     endcase

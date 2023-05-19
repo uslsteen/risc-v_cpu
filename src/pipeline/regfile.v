@@ -7,10 +7,12 @@ module regfile (input clk,
                );
     //
     reg [31:0] reg_file[31:0];
+    
     // three ported register file
     // read two ports combinationally
     // write third port on rising edge of clock
     // register 0 hardwired to 0
+
     always @ (posedge clk)
         if (we3) reg_file[wa3] <= wd3;
     assign rd1 = (ra1 != 0) ? reg_file[ra1] : 0;
