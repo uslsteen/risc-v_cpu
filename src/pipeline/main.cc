@@ -39,7 +39,8 @@ int main(int argc, char **argv) {
   std::string elf_path{}, vcd_path{};
   int end_time = 0;
   //
-  parse_args(elf_path, vcd_path, end_time, trace_mode, argc, argv);
+  if (parse_args(elf_path, vcd_path, end_time, trace_mode, argc, argv) == 0)
+    return 0;
 
   // Init verialtor
   Verilated::commandArgs(argc, argv);

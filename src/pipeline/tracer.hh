@@ -19,6 +19,7 @@ class Tracer final {
 
   std::unique_ptr<VerilatedVcdC> m_vcd{};
   uint32_t m_levels{};
+  uint32_t m_icount = 0;
   //
 public:
   //
@@ -83,7 +84,32 @@ private:
   }
 
   void cosim_dump(Vtop *top_module) {}
-  void tact_dump(Vtop *top_module) {}
+
+  //
+  void tact_dump(Vtop *top_module) {
+    auto &pdatapath = top_module->top->riscv->dp;
+    std::cout << "*********************************************************"
+                 "**********************"
+              << std::endl;
+    //
+    std::cout << "TACT = " << std::dec << (int)pdatapath->tact_num << std::endl;
+    std::cout << "ICOUNT = " << std::dec << (int)m_icount++ << std::endl;
+    std::cout << "PC = "
+              << "0x" << std::hex << pdatapath->pc_out << std::endl;
+    //
+    if (pdatapath->reg_write) {
+      int rd = (int)pdatapath->rd;
+      std::string rd2str =
+          (rd / 10) == 0 ? "0" + std::to_string(rd) : std::to_string(rd);
+      std::cout << "[" << rd2str << "]";
+      std::cout << " = " << std::hex << pdatapath->result << std::endl;
+    }
+    //
+    else if (pdatapath->mem_write)
+      std::cout << "MEM[" << std::hex << pdatapath->alu_out
+                << "] = " << std::hex << pdatapath->write_data << std::endl;
+    //
+  }
 
 public:
   void dump(vluint64_t time) { m_vcd->dump(time); }

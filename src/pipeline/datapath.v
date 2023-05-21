@@ -92,6 +92,7 @@ module datapath (input clk, reset, endD,
     logic [31:0] resultW;
 
     imm_sel imm_sel(.instr(instrD), .imm(immD));
+    assign imm = immD;
     //
     regfile rf(.clk(clk), 
                .ra1(ra1D),
@@ -272,12 +273,17 @@ module datapath (input clk, reset, endD,
                       .d1(read_dataW),
                       .s(mem_to_regW), 
                       .y(resultW));
-
+                    
+    reg[31:0] tact_num /*verilator public*/;
+    assign tact_num = 0;
+    
+    always @(negedge clk) begin
+        tact_num <= tact_num + 1;
+    end
     //
     assign pc_out = pcW;
     //    
     assign instr = instrW;
-    assign imm = immE;
     assign valid = validW;
     //
     assign reg_write = reg_writeW & rdW != 0;
