@@ -8,8 +8,7 @@ module riscv (input clk, reset,
              );
     //
     logic mem_to_regD, reg_writeD, jumpD;
-    logic alu_src_is_zeroD;
-    logic jump_srcD, hltD, branchD, inv_branchD, mem_writeD;
+    logic jump_srcD, endD, branchD, inv_branchD, mem_writeD;
     //
     logic [1:0] alu_srcAD, alu_srcBD; 
     logic [3:0] alu_controlD;
@@ -28,15 +27,14 @@ module riscv (input clk, reset,
                  .jumpD(jumpD),
                  .alu_controlD(alu_controlD), 
                  .jump_srcD(jump_srcD), 
-                 .alu_src_is_zeroD(alu_src_is_zeroD), 
-                 .hltD(hltD),
+                 .endD(endD),
                  .branchD(branchD),
                  .inv_branchD(inv_branchD)
                  );
     //
     datapath dp(.clk(clk), 
                 .reset(reset), 
-                .hltD(hltD), 
+                .endD(endD), 
                 .mem_to_regD(mem_to_regD), 
                 .mem_writeD(mem_writeD), 
                 .jump_srcD(jump_srcD),
@@ -46,8 +44,7 @@ module riscv (input clk, reset,
                 .reg_writeD(reg_writeD), 
                 .jumpD(jumpD),
                 .alu_controlD(alu_controlD), 
-                .alu_src_is_zeroD(alu_src_is_zeroD),
-                .pcF(pcF), 
+                .pcF(pcF),
                 .instrF(instrF),
                 .alu_outM(alu_outM), 
                 .write_dataM(write_dataM), 

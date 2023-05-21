@@ -8,7 +8,7 @@ module controller (input [6:0] opc,
                    output logic reg_writeD,
                    output logic jumpD,
                    output [3:0] alu_controlD,
-                   output logic jump_srcD, alu_src_is_zeroD, hltD, branchD, inv_branchD
+                   output logic jump_srcD, endD, branchD, inv_branchD
                   );
     //
     maindec md (.opc(opc),
@@ -19,11 +19,10 @@ module controller (input [6:0] opc,
                 .branch(branchD),
                 .alu_srcA(alu_srcAD),
                 .alu_srcB(alu_srcBD),
-                .alu_src_is_zero(alu_src_is_zeroD),
                 .reg_write(reg_writeD),
                 .jump(jumpD),
                 .jump_src(jump_srcD),
-                .hlt(hltD)
+                .is_end(endD)
                );
     //
     aludec ad (.opc(opc),
@@ -32,7 +31,5 @@ module controller (input [6:0] opc,
                .alu_control(alu_controlD),
                .inv_branch(inv_branchD)
               );
-    //
-    // assign pcsrc = branch & (is_zero ^ inv_branchD);
     //
 endmodule

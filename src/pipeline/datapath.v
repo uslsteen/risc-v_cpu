@@ -1,7 +1,7 @@
 `include "consts.v"
 
 //
-module datapath (input clk, reset, hltD,
+module datapath (input clk, reset, endD,
                  //
                  input mem_to_regD, mem_writeD, jump_srcD,
                  input [2:0] mem_sizeD,
@@ -10,7 +10,6 @@ module datapath (input clk, reset, hltD,
                  //
                  input reg_writeD, jumpD,
                  input [3:0] alu_controlD,
-                 input alu_src_is_zeroD,
                  output [31:0] pcF,
                  input [31:0] instrF,
                  output [31:0] alu_outM, write_dataM,
@@ -20,7 +19,20 @@ module datapath (input clk, reset, hltD,
                  input branchD, inv_branchD,
                  output [31:0] instrD
                 );
-    //
+
+    logic [31:0] pc_out         /*verilator public*/;
+    logic [31:0] instr          /*verilator public*/;
+    logic [31:0] imm            /*verilator public*/;
+    logic [4:0]  rd             /*verilator public*/;
+    logic [4:0] ra1             /*verilator public*/;
+    logic [4:0] ra2             /*verilator public*/;
+    logic [31:0] alu_out        /*verilator public*/; 
+    logic [31:0] write_data     /*verilator public*/; 
+    logic [31:0] result         /*verilator public*/;
+    logic mem_write             /*verilator public*/;
+    logic reg_write             /*verilator public*/;
+    logic valid                 /*verilator public*/;
+    logic is_end                /*verilator public*/;
 
     //! -------------------------------------------------------------
     //! NOTE: fetch stage
@@ -63,19 +75,21 @@ module datapath (input clk, reset, hltD,
     //! -------------------------------------------------------------
     //! NOTE: decode stage
     logic [31:0] immD, rd1D, rd2D;
-    logic [4:0] ra1D = instrD[19:15] & ~{5{alu_src_is_zeroD}}; 
-    logic [4:0] ra2D = instrD[24:20];; 
+    logic [4:0] ra1D = instrD[19:15]; 
+    logic [4:0] ra2D = instrD[24:20]; 
     logic [4:0] rdD = instrD[11:7];
     logic [4:0] rdW;
     logic reg_writeW;
-    logic hltE, mem_to_regE, jump_srcE, reg_writeE,
+    logic endE, mem_to_regE, jump_srcE, reg_writeE,
                 mem_writeE, branchE, inv_brE, flushE;
     //
     logic [1:0] alu_srcAE, alu_srcBE;
     logic [2:0] mem_sizeE;
     logic [3:0] alu_controlE;
     logic [4:0] ra1E, ra2E, rdE;
-    logic [31:0] pcE, rd1E, rd2E, immE, instrE, resultW;
+    logic [31:0] immE;
+    logic [31:0] pcE, rd1E, rd2E, instrE;
+    logic [31:0] resultW;
 
     imm_sel imm_sel(.instr(instrD), .imm(immD));
     //
@@ -88,7 +102,7 @@ module datapath (input clk, reset, hltD,
               );
     //
     pipereg #(`D2E_WIDTH) Decode2Exec(.clk(clk), .en(1), .clr(flushE),
-                               .inp({hltD, 
+                               .inp({endD, 
                                      mem_to_regD, 
                                      jump_srcD, 
                                      alu_srcAD, 
@@ -109,7 +123,7 @@ module datapath (input clk, reset, hltD,
                                      immD, 
                                      instrD}),
                                 //
-                               .out({hltE,
+                               .out({endE,
                                      mem_to_regE, 
                                      jump_srcE, 
                                      alu_srcAE, 
@@ -183,9 +197,10 @@ module datapath (input clk, reset, hltD,
     logic [31:0] write_dataE;
     assign write_dataE = rd2Efrw;
 
-    logic reg_writeM, mem_to_regM, hltM, controlChangeM;
+    logic reg_writeM, mem_to_regM, endM, controlChangeM;
     logic [4:0] rdM;
-    logic [31:0] pcM, instrM;
+    logic [31:0] pcM;
+    logic [31:0] instrM;
 
     pipereg #(`E2M_WIDTH) Exec2Memory(.clk(clk), 
                                .en(1), 
@@ -193,7 +208,7 @@ module datapath (input clk, reset, hltD,
                                .inp({reg_writeE, 
                                      mem_to_regE,  
                                      mem_writeE,
-                                     hltE, 
+                                     endE, 
                                      mem_sizeE, 
                                      rdE, 
                                      write_dataE, 
@@ -205,7 +220,7 @@ module datapath (input clk, reset, hltD,
                                .out({reg_writeM, 
                                      mem_to_regM, 
                                      mem_writeM,
-                                     hltM, 
+                                     endM, 
                                      mem_sizeM, 
                                      rdM, 
                                      write_dataM, 
@@ -216,15 +231,18 @@ module datapath (input clk, reset, hltD,
 
     //! -------------------------------------------------------------
     //! NOTE: memory stage
-    logic mem_to_regW, mem_writeW, validW, controlChangeW, hltW;
-    logic [31:0] alu_outW, read_dataW, write_dataW, pcW, instrW;
-
+    //
+    logic mem_writeW, controlChangeW, mem_to_regW, endW;
+    logic validW;
+    logic [31:0] pcW, instrW, alu_outW, write_dataW, read_dataW;
+    //
+    
     pipereg #(`M2W_WIDTH) Memory2Write(.clk(clk), 
                                 .en(1), 
                                 .clr(reset),
                                 .inp({reg_writeM, 
                                       mem_to_regM, 
-                                      hltM, 
+                                      endM, 
                                       rdM, 
                                       alu_outM, 
                                       read_dataM, 
@@ -237,7 +255,7 @@ module datapath (input clk, reset, hltD,
                                 //
                                 .out({reg_writeW, 
                                       mem_to_regW, 
-                                      hltW, 
+                                      endW, 
                                       rdW, 
                                       alu_outW, 
                                       read_dataW, 
@@ -250,8 +268,28 @@ module datapath (input clk, reset, hltD,
 
     //! -------------------------------------------------------------
     //! NOTE: writeback stage
-    mux2 #(32) resmux(.d0(alu_outW), .d1(read_dataW),
-                      .s(mem_to_regW), .y(resultW));
+    mux2 #(32) resmux(.d0(alu_outW), 
+                      .d1(read_dataW),
+                      .s(mem_to_regW), 
+                      .y(resultW));
+
+    //
+    assign pc_out = pcW;
+    //    
+    assign instr = instrW;
+    assign imm = immE;
+    assign valid = validW;
+    //
+    assign reg_write = reg_writeW & rdW != 0;
+    assign rd = rdW;
+    assign ra1 = ra1E;
+    assign ra2 = ra2E;
+    assign result = resultW;
+    //
+    assign mem_write = mem_writeW;
+    assign alu_out = alu_outW;
+    assign write_data = write_dataW;
+    assign is_end = endW;
 
     //! -------------------------------------------------------------
     
@@ -279,7 +317,7 @@ module datapath (input clk, reset, hltD,
                                 mem_writeW,
                                 validW,
                                 controlChangeW,
-                                hltW,
+                                endW,
                                 write_dataW,
                                 pcW,
                                 instrW,

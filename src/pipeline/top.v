@@ -1,7 +1,8 @@
 module top (input clk, reset);
     //
     logic [31:0] pcF /* verilator public */;
-    logic [31:0] instrF, read_dataM, write_dataM, alu_outM;
+    logic [31:0] instrF /* verilator public */;
+    logic [31:0] read_dataM, write_dataM, alu_outM;
     logic [2:0] mem_sizeM;
     logic mem_writeM;
     //

@@ -3,7 +3,7 @@
 module imm_sel (
                 input [31:0] instr,
                 output [31:0] imm
-              );
+               );
     //
     logic [31:0] im;
     assign imm = im;

@@ -7,7 +7,6 @@ module set_forward (
                      input reg_writeM, reg_writeW,
                      output [1:0] forward
                    );
-
     //
     assign forward = ((raE == rdM) && reg_writeM && (raE != 0)) ? `FORWARD_FROM_MEMORY :
                      ((raE == rdW) && reg_writeW && (raE != 0)) ? `FORWARD_FROM_WB :

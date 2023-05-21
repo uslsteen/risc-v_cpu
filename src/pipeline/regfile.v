@@ -6,7 +6,7 @@ module regfile (input clk,
                 output [31:0] rd1, rd2
                );
     //
-    reg [31:0] reg_file[31:0];
+    reg [31:0] reg_file[31:0] /*verilator public*/;
     
     // three ported register file
     // read two ports combinationally
