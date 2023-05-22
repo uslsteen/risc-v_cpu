@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string>
 
-constexpr int end = 1000;
+constexpr int end = 1000000;
 
 int parse_args(std::string &elf_path, std::string &vcd_path, int &end_time,
                Tracer::DumpMode& trace_mode, int argc, char **argv) {

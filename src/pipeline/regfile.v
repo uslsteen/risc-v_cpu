@@ -13,7 +13,7 @@ module regfile (input clk,
     // write third port on rising edge of clock
     // register 0 hardwired to 0
 
-    always @ (posedge clk)
+    always @ (negedge clk)
         if (we3) reg_file[wa3] <= wd3;
     assign rd1 = (ra1 != 0) ? reg_file[ra1] : 0;
     assign rd2 = (ra2 != 0) ? reg_file[ra2] : 0;

@@ -1,3 +1,4 @@
+
 `include "consts.v"
 
 //
@@ -78,7 +79,7 @@ module datapath (input clk, reset, endD,
     logic [4:0] ra1D = instrD[19:15]; 
     logic [4:0] ra2D = instrD[24:20]; 
     logic [4:0] rdD = instrD[11:7];
-    logic [4:0] rdW;
+    logic [4:0] rdW, ra1W, ra2W;
     logic reg_writeW;
     logic endE, mem_to_regE, jump_srcE, reg_writeE,
                 mem_writeE, branchE, inv_brE, flushE;
@@ -184,7 +185,7 @@ module datapath (input clk, reset, endD,
             .b(srcBE),
             .alu_op(alu_controlE), 
             .alu_out(alu_outE),
-            .zero(zeroE));
+            .is_zero(zeroE));
 
     logic [31:0] jmp_baseE, jmp_pcE;
     adder pcaddimm(.a(pcE), .b(immE), .y(pcbranchE));
@@ -199,7 +200,7 @@ module datapath (input clk, reset, endD,
     assign write_dataE = rd2Efrw;
 
     logic reg_writeM, mem_to_regM, endM, controlChangeM;
-    logic [4:0] rdM;
+    logic [4:0] rdM, ra1M, ra2M;
     logic [31:0] pcM;
     logic [31:0] instrM;
 
@@ -212,6 +213,8 @@ module datapath (input clk, reset, endD,
                                      endE, 
                                      mem_sizeE, 
                                      rdE, 
+                                     ra1E,
+                                     ra2E,
                                      write_dataE, 
                                      alu_outE,
                                      pcE, 
@@ -224,6 +227,8 @@ module datapath (input clk, reset, endD,
                                      endM, 
                                      mem_sizeM, 
                                      rdM, 
+                                     ra1M,
+                                     ra2M,
                                      write_dataM, 
                                      alu_outM, 
                                      pcM, 
@@ -244,7 +249,9 @@ module datapath (input clk, reset, endD,
                                 .inp({reg_writeM, 
                                       mem_to_regM, 
                                       endM, 
-                                      rdM, 
+                                      rdM,
+                                      ra1M,
+                                      ra2M, 
                                       alu_outM, 
                                       read_dataM, 
                                       mem_writeM, 
@@ -258,6 +265,8 @@ module datapath (input clk, reset, endD,
                                       mem_to_regW, 
                                       endW, 
                                       rdW, 
+                                      ra1W, 
+                                      ra2W,
                                       alu_outW, 
                                       read_dataW, 
                                       mem_writeW, 
@@ -288,8 +297,8 @@ module datapath (input clk, reset, endD,
     //
     assign reg_write = reg_writeW & rdW != 0;
     assign rd = rdW;
-    assign ra1 = ra1E;
-    assign ra2 = ra2E;
+    assign ra1 = ra1W;
+    assign ra2 = ra2W;
     assign result = resultW;
     //
     assign mem_write = mem_writeW;
